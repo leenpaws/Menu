@@ -28,33 +28,6 @@ session = DBSession()
 class webserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            if self.path.endswith("/hello"):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
-
-                output = ""
-                output += "<html><body>"
-                output += "<h1>Hello!</h1>"
-                output += '''<form method='POST' enctype='multipart/form-data' action='http://127.0.0.1/'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
-
-                output += "</body></html>"
-                self.wfile.write(output)
-                print output
-                return
-
-            if self.path.endswith("/hola"):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
-                output = ""
-                output += "<html><body>"
-                output += "<h1>&#161 Hola !</h1>"
-                output += '''<form method='POST' enctype='multipart/form-data' action='http://127.0.0.1/'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
-                output += "</body></html>"
-                self.wfile.write(output)
-                print output
-                return
 
             #   Objective 1 visiting /restaurants lists all the
             #   restaurant names in the database
@@ -72,7 +45,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 output += "</form></body></html>"
                 self.wfile.write(output)
                 return
-
+            #   Objective 2
             if self.path.endswith("/restaurant"):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -88,12 +61,52 @@ class webserverHandler(BaseHTTPRequestHandler):
                     output += "</br>"
                     output += "<a href =' #'> Delete </a>"
                 output += "</html></body>"
-
                 self.wfile.write(output)
                 return
+            # Objective 4 rename restaurant by going to /restaurant/id/edit
+            if self.path.endswith("/edit"):
+                #   third value of this array contains res. ID number
+                restaurantIDPath = self.path.split("/")[2]
+                #filter by ID to get number
+                myRestaurantQuery = session.query(Restaurant).filter_by(
+                    id=restaurantIDPath).one()
+                if myRestaurantQuery:
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
+                    output = "<html><body>"
+                    output += "<h1>"
+                    output += myRestaurantQuery.name
+                    output += "</h1>"
+                    output += "<form method='POST' enctype='multipart/form-data' action = '/restaurants/%s/edit' >" % restaurantIDPath
+                    output += "<input name = 'newRestaurantName' type='text' placeholder = '%s' >" % myRestaurantQuery.name
+                    output += "<input type = 'submit' value = 'Rename'>"
+                    output += "</form>"
+                    output += "</body></html>"
+                    self.wfile.write(output)
 
+
+            #Objective 5: delete restaurant
+            if self.path.endswith("/delete"):
+                restaurantIDPath = self.path.split("/")[2]
+
+                myRestaurantQuery = session.query(Restaurant).filter_by(
+                    id=restaurantIDPath).one()
+                if myRestaurantQuery:
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
+                    output = ""
+                    output += "<html><body>"
+                    output += "<h1>Are you sure you want to delete %s?" % myRestaurantQuery.name
+                    output += "<form method='POST' enctype = 'multipart/form-data' action = '/restaurants/%s/delete'>" % restaurantIDPath
+                    output += "<input type = 'submit' value = 'Delete'>"
+                    output += "</form>"
+                    output += "</body></html>"
+                    self.wfile.write(output)
         except IOError:
             self.send_error(404, "File Not Found %s" % self.path)
+
 
 
 #Get is to get info using Urls
@@ -104,32 +117,57 @@ def do_POST(self):
         self.send_response(301)
         self.end_headers()
 
-        ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
         if self.path.endswith("/restaurant/name"):
-
-
-
-
+            ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
             if ctype == 'multipart/form-data':
                 fields = cgi.parse_multipart(self.rfile, pdict)
                 messagecontent = fields.get('newRestaurantName')
 
-            output = ""
-            output =+ "<html><body>"
-            output =+ "<h2>Okay, how about this: </h2>"
-            output =+ "<h1> %s </h1>" % messagecontent[0]
-            output += '''<form method='POST' enctype='multipart/form-data' \
-            action='http://127.0.0.1/'><h2>What would you like me to say?</h2> \
-            <input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
-            output += "</body></html>"
-            self.wfile.write(output)
-            print output
-            return
+                # Create new Restaurant Object
+                newRestaurant = Restaurant(name=messagecontent[0])
+                session.add(newRestaurant)
+                session.commit()
+
+                self.send_response(301)
+                self.send_header('Content-type', 'text/html')
+                self.send_header('Location', '/restaurants')
+                self.end_headers()
+        #Objective 4 to edit restaurant name:
+        if self.path.endswith("/edit"):
+            ctype, pdict = cgi.parse_header(
+                self.headers.getheader('content-type'))
+            if ctype == 'multipart/form-data':
+                #grab input
+                fields = cgi.parse_multipart(self.rfile, pdict)
+                messagecontent = fields.get('newRestaurantName')
+                restaurantIDPath = self.path.split("/")[2]
+
+                myRestaurantQuery = session.query(Restaurant).filter_by(
+                    id=restaurantIDPath).one()
+                #reset name field to entry created in form-add to session-commit
+                if myRestaurantQuery != []:
+                    myRestaurantQuery.name = messagecontent[0]
+                    session.add(myRestaurantQuery)
+                    session.commit()
+                    self.send_response(301)
+                    self.send_header('Content-type', 'text/html')
+                    self.send_header('Location', '/restaurants')
+                    self.end_headers()
+        #Objective 5: delete restaurant
+        if self.path.endswith("/delete"):
+            restaurantIDPath = self.path.split("/")[2]
+            myRestaurantQuery = session.query(Restaurant).filter_by(
+                id=restaurantIDPath).one()
+            if myRestaurantQuery:
+                session.delete(myRestaurantQuery)
+                session.commit()
+                self.send_response(301)
+                self.send_header('Content-type', 'text/html')
+                self.send_header('Location', '/restaurants')
+                self.end_headers()
 
     except:
         pass
-
-
 #main
 def main():
     try:
