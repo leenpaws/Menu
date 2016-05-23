@@ -1,0 +1,82 @@
+{% logical code %}
+single bracket code is logical that want to execute
+double bracket indicate code thta we want it's results printed into
+can't use indentations to mark beginning and ending of loops so use
+keywords like endif and endfor
+URL building
+url_for()   helper function
+documentation is on flask page
+after an anchor tag there should be a url
+
+for JSOn quiz, why isnt there a restaurant
+when adding a new restaurant, should you return an id?
+
+
+need to make 8 templates
+
+
+restaurants.html
+/restaurants/
+methods= showRestaurants()
+"This page will show all my restaurants"
+
+
+newRestaurant.html
+/restaurant/new
+newRestaurant()
+"This page will be for making a new restaurant"
+
+editRestaurant.htm
+restaurant/<int:restaurant_id>/edit
+editRestaurant()
+"This page will be for editing restaurant %s"
+% restaurant_id
+
+deleteRestaurant.html
+/restaurant/<int:restaurant_id>/delete/
+deleteRestaurant()
+"This page will be for deleting restaurant%s"
+%restaurant_id
+
+menu.html
+restaurant/<int:restaurant_id>/
+/restaurant/restaurant_id/menu
+/restaurant/restaurant_id/
+showMenu()
+"This page is the menu for restaurant %s" restaurant_id
+
+
+restaurant/<int:restaurant_id>/menu/new
+newMenuItem()
+newMenuItem.html
+"This page is for making a new menu item for restaurant %s" %restaurant_id
+
+restaurant/<int:restaurant_id>/<int:menu_id>/edit/
+editMenuItem.html
+editMenuItem()
+"This page is for editing menu item %s" menu_id
+
+deleteMenuItem.html
+deleteMenuItem()
+restaurant/<int:restaurant_id>/<int:menu_id>/delete/
+"This page is for deleting menu item %s" menu_id
+
+
+
+checklist:
+1.mockups
+    8 diff webpages
+
+
+
+
+2. routing
+import flash module add routing for all pages in final page
+3. templates & forms
+
+4. crud functionality
+
+5. api endpoints
+    data to be sent
+
+6. styling & message flashing
