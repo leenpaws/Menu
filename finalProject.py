@@ -26,7 +26,7 @@ def restaurantMenuJSON(restaurant_id):
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON/')
 def menuItemJSON(restaurant_id, menu_id):
     # restaurant = restaurantMenuJSON(restaurant_id) doesn't exist in solution code but y??
-    menuItem = session.query(restaurant).filter_by(id=menu_id).one()
+    menuItem = session.query(MenuItem).filter_by(id=menu_id).one()
     return jsonify(MenuItems=[menuItem.serialize])
 
 
@@ -39,13 +39,15 @@ def menuItemJSON(restaurant_id, menu_id):
 @app.route('/')
 @app.route('/restaurant')
 def showRestaurants():
-    restaurant = session.query('Restaurant').all()
+    restaurant = session.query(Restaurant).all()
     flash('This page will show all my restaurants')
     output = ''
     for i in restaurant:
         output += i.name
         output += '<br>'
-
+        output += '<br>'
+        output += '<br>'
+    return output
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
 # by default the route only responds to get requests but method makes it reposond to whatever you set it to
@@ -57,8 +59,15 @@ def newRestaurant():
         session.commit()
         flash('This page will be for making a new restaurant')
         return redirect(url_for('restaurant'))
+
+    #return redirect("/showRestaurants") or redirect(url_for("/restaurant"))
+    #it's not the function it's the url, you're trying to build the url
+
     else:
         return render_template('newrestaurant.html')
+
+
+
 
 @app.route('/restaurants/<int:restaurant_id>/edit', methods=['GET', 'POST'])
 def editRestaurant(restaurant_id):
@@ -69,20 +78,27 @@ def editRestaurant(restaurant_id):
         session.add(editedRestaurant)
         session.commit()
         flash("This page will be for editing restaurant")
-        return redirect(url_for('restaurant', restaurant_id=restaurant_id))
+        return redirect(url_for('showRestaurants'))
+    #url_for(show function) show the endpoint
     else:
         # USE THE RENDER_TEMPLATE FUNCTION BELOW TO SEE THE VARIABLES YOU SHOULD USE IN YOUR EDITMENUITEM TEMPLATE
-        return render_template('editRestaurant.html', restaurant_id=restaurant_id,
-                               i=editedRestaurant)
+        return render_template('editRestaurant.html', restaurant_id=restaurant_id, i=editedRestaurant)
+#use variables, for example restaurant_id, when it is applicable, otherwise leave out
+#this applies to variables that point within also, i.e. restaurant_id/menu_id
+#can also directly provide url
+
+
+rahul.ranjan@udacity.com
+
 
 @app.route('/restaurants/<int:restaurant_id>/delete', methods=['GET', 'POST'])
-def deleteMenuItem(restaurant_id):
+def deleteRestaurant(restaurant_id):
     itemToDelete = session.query(Restaurant).filter_by(id = restaurant_id).one()
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()
         flash("This page will be for deleting restaurant")
-        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
     else:
         return render_template('deleteRestaurant.html', item=itemToDelete)
 
@@ -91,7 +107,7 @@ def deleteMenuItem(restaurant_id):
 #  render the page even if it's not there
 @app.route('/restaurants/<int:restaurant_id>/')
 @app.route('/restaurants/restaurant_id/menu/')
-def restaurantMenu(restaurant_id):
+def showMenu(restaurant_id):
     restaurant = session.query(Restaurant).filter_by \
         (id=restaurant_id).one()
     items = session.query(MenuItem).filter_by \
@@ -122,7 +138,7 @@ def newMenuItem(restaurant_id):
         session.add(newItem)
         session.commit()
         flash('new menu item created')
-        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
     else:
         return render_template('newmenuitem.html', restaurant_id=restaurant_id)
         # restaurant = session.query(Restaurant).filter_by \
@@ -152,7 +168,7 @@ def editMenuItem(restaurant_id, MenuID):
         session.add(editedItem)
         session.commit()
         flash("menu item edited")
-        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
     else:
         # USE THE RENDER_TEMPLATE FUNCTION BELOW TO SEE THE VARIABLES YOU SHOULD USE IN YOUR EDITMENUITEM TEMPLATE
         return render_template('editmenuitem.html', restaurant_id=restaurant_id,
@@ -169,7 +185,7 @@ def deleteMenuItem(restaurant_id, menu_id):
         session.delete(itemToDelete)
         session.commit()
         flash("menu item deleted")
-        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
     else:
         return render_template('deleteMenuItem.html', item=itemToDelete)
 
