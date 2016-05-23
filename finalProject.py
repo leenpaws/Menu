@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, \
-jsonify
+    jsonify
 
 # instance with name of running app
-#adding database to flask app
+# adding database to flask app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Database_setup import Base, Restaurant, MenuItem
@@ -13,25 +13,28 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+
 # Making an API Endpoint (GET Request)
 @app.route('/restaurants/<int:restaurant_id>/menu/JSON/')
-
 def restaurantMenuJSON(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id = restaurant_id).all()
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
     return jsonify(MenuItems=[i.serialize for i in items])
+
 
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON/')
 def menuItemJSON(restaurant_id, menu_id):
-    #restaurant = restaurantMenuJSON(restaurant_id) doesn't exist in solution code but y??
+    # restaurant = restaurantMenuJSON(restaurant_id) doesn't exist in solution code but y??
     menuItem = session.query(restaurant).filter_by(id=menu_id).one()
-    return jsonify(MenuItems =[menuItem.serialize])
+    return jsonify(MenuItems=[menuItem.serialize])
 
 
 """decorator"""
 
+
 # @app decorator will wrap function inside the app.route function that flash has created
-#so either of these routes gets sent from browser function defined here gets executed
+# so either of these routes gets sent from browser function defined here gets executed
 
 @app.route('/')
 @app.route('/restaurant')
@@ -42,6 +45,7 @@ def showRestaurants():
     for i in restaurant:
         output += i.name
         output += '<br>'
+
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
 # by default the route only responds to get requests but method makes it reposond to whatever you set it to
@@ -56,19 +60,42 @@ def newRestaurant():
     else:
         return render_template('newrestaurant.html')
 
+@app.route('/restaurants/<int:restaurant_id>/edit', methods=['GET', 'POST'])
+def editRestaurant(restaurant_id):
+    editedRestaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            editedRestaurant.name = request.form['name']
+        session.add(editedRestaurant)
+        session.commit()
+        flash("This page will be for editing restaurant")
+        return redirect(url_for('restaurant', restaurant_id=restaurant_id))
+    else:
+        # USE THE RENDER_TEMPLATE FUNCTION BELOW TO SEE THE VARIABLES YOU SHOULD USE IN YOUR EDITMENUITEM TEMPLATE
+        return render_template('editRestaurant.html', restaurant_id=restaurant_id,
+                               i=editedRestaurant)
+
+@app.route('/restaurants/<int:restaurant_id>/delete', methods=['GET', 'POST'])
+def deleteMenuItem(restaurant_id):
+    itemToDelete = session.query(Restaurant).filter_by(id = restaurant_id).one()
+    if request.method == 'POST':
+        session.delete(itemToDelete)
+        session.commit()
+        flash("This page will be for deleting restaurant")
+        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
+    else:
+        return render_template('deleteRestaurant.html', item=itemToDelete)
 
 
-#@app.route('/hello'), trailing slash will allow flash to
+# @app.route('/hello'), trailing slash will allow flash to
 #  render the page even if it's not there
 @app.route('/restaurants/<int:restaurant_id>/')
 @app.route('/restaurants/restaurant_id/menu/')
-
 def restaurantMenu(restaurant_id):
-
     restaurant = session.query(Restaurant).filter_by \
-        (id = restaurant_id).one()
+        (id=restaurant_id).one()
     items = session.query(MenuItem).filter_by \
-        (restaurant_id = restaurant_id)
+        (restaurant_id=restaurant_id)
 
     output = ''
     for i in items:
@@ -82,16 +109,15 @@ def restaurantMenu(restaurant_id):
     return output
 
 
+# Task1: create route for newmenuitem function here
 
-#Task1: create route for newmenuitem function here
-
-@app.route('/restaurants/<int:restaurant_id>/new/', methods = ['GET', 'POST'])
-#by default the route only responds to get requests but method makes it reposond to whatever you set it to
+@app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
+# by default the route only responds to get requests but method makes it reposond to whatever you set it to
 
 def newMenuItem(restaurant_id):
     if request.method == 'POST':
         newItem = MenuItem(name=request.form['name'], description=request.form[
-                           'description'], price=request.form['price'],
+            'description'], price=request.form['price'],
                            course=request.form['course'], restaurant_id=restaurant_id)
         session.add(newItem)
         session.commit()
@@ -99,23 +125,25 @@ def newMenuItem(restaurant_id):
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
         return render_template('newmenuitem.html', restaurant_id=restaurant_id)
-    #restaurant = session.query(Restaurant).filter_by \
-     #   (id=restaurant_id).one()
-    #items = MenuItem()
-   # items.name = raw_input(MenuItem.name) + '</br>'
-  #  items.course = raw_input(MenuItem.course) + '</br>'
- #   items.price = raw_input(MenuItem.price) + '</br>'
-#    items.description = raw_input(MenuItem.description)+ '</br>'
+        # restaurant = session.query(Restaurant).filter_by \
+        #   (id=restaurant_id).one()
+        # items = MenuItem()
+        # items.name = raw_input(MenuItem.name) + '</br>'
+        #  items.course = raw_input(MenuItem.course) + '</br>'
+        #   items.price = raw_input(MenuItem.price) + '</br>'
+    #    items.description = raw_input(MenuItem.description)+ '</br>'
 
-   # newItem = MenuItem(name= items.name, description=items.description,
-  #                   price = items.price, course=items.course, restaurant=restaurant)
- #   session.add(newItem)
+    # newItem = MenuItem(name= items.name, description=items.description,
+    #                   price = items.price, course=items.course, restaurant=restaurant)
+    #   session.add(newItem)
+
+
 #    session.commit()
 
 
-#Task2: create route for editmenuitem function here
+# Task2: create route for editmenuitem function here
 
-@app.route('/restaurants/<int:restaurant_id>/<int:MenuID>/edit', methods = ['GET', 'POST'])
+@app.route('/restaurants/<int:restaurant_id>/<int:MenuID>/edit', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, MenuID):
     editedItem = session.query(MenuItem).filter_by(id=MenuID).one()
     if request.method == 'POST':
@@ -131,7 +159,7 @@ def editMenuItem(restaurant_id, MenuID):
                                MenuID=MenuID, i=editedItem)
 
 
-    #task3:create a route for deletemenuitem function here
+        # task3:create a route for deletemenuitem function here
 
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
@@ -143,14 +171,14 @@ def deleteMenuItem(restaurant_id, menu_id):
         flash("menu item deleted")
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
-        return render_template('deleteconfirmation.html', item=itemToDelete)
+        return render_template('deleteMenuItem.html', item=itemToDelete)
 
 
 # main is app run by interpreter, other file have __name of pythonfile__
 # main is ensuring it can't be imported, by default server is only accessible from host machine
 
 if __name__ == '__main__':
-    #debug support ensures server will reload itself
+    # debug support ensures server will reload itself
     app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
