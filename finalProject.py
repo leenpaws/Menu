@@ -14,12 +14,18 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# Making an API Endpoint (GET Request)
+@app.route('/restaurants/JSON/')
+def restaurantsJSON():
+    restaurants = session.query(Restaurant).all()
+    return jsonify(allrestaurants=[i.serialize for i in restaurants])
+
 
 # Making an API Endpoint (GET Request)
 @app.route('/restaurants/<int:restaurant_id>/menu/JSON/')
 def restaurantMenuJSON(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
     return jsonify(MenuItems=[i.serialize for i in items])
 
 
@@ -37,7 +43,7 @@ def menuItemJSON(restaurant_id, menu_id):
 # so either of these routes gets sent from browser function defined here gets executed
 
 @app.route('/')
-@app.route('/restaurant')
+@app.route('/restaurants')
 def showRestaurants():
     restaurant = session.query(Restaurant).all()
     flash('This page will show all my restaurants')
