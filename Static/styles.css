@@ -11,9 +11,9 @@ a {text-decoration: none; color:#FFFFCC; font-size: .75em;}
 .pane {position:absolute; left: 25%; border: 2px solid;
     border-radius: 25px; padding: 5px; margin: 5px; border-color: #999999; background-color: #333333 }
 .header         {left:50%; text-align: center;}
-.name {width:50%;display: inline-block; float: left;}
-.description {}
-.price {text-align: right; width:50%; float: right; }
-.editdeletepane{text-align: right; width:50%; float: right; border-color: #999999;}
+.name {width:50%; display: inline-block; float: left;}
+.description {position:relative;float:left; display: inline-block;}
+.price {text-align: right; width:50%;}
+.editdeletepane{text-align: left; width:50%; text-underline-position: left; border-color: #999999;}
 
 .flash          { background: #cee5F5; }

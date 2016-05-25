@@ -49,9 +49,9 @@ def showRestaurants():
         output += '<br>'
     return output
 
+
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
 # by default the route only responds to get requests but method makes it reposond to whatever you set it to
-
 def newRestaurant():
     if request.method == 'POST':
         newrestaurant = Restaurant(name=request.form['name'])
@@ -106,26 +106,13 @@ def deleteRestaurant(restaurant_id):
 # @app.route('/hello'), trailing slash will allow flash to
 #  render the page even if it's not there
 @app.route('/restaurants/<int:restaurant_id>/')
-@app.route('/restaurants/restaurant_id/menu/')
+@app.route('/restaurants/<int:restaurant_id>/menu/')
 def showMenu(restaurant_id):
     restaurant = session.query(Restaurant).filter_by \
         (id=restaurant_id).one()
     items = session.query(MenuItem).filter_by \
         (restaurant_id=restaurant_id)
-
-    output = str(restaurant.name)
-    output += '</br>'
-    output += '</br>'
-    for i in items:
-        output += i.name
-        output += '</br>'
-        output += i.price
-        output += '</br>'
-        output += i.description
-        output += '</br>'
-        output += '</br>'
-    return output
-
+    return render_template('showMenu.html', restaurant=restaurant, items=items, restaurant_id=restaurant_id)
 
 # Task1: create route for newmenuitem function here
 
@@ -161,9 +148,11 @@ def newMenuItem(restaurant_id):
 
 # Task2: create route for editmenuitem function here
 
-@app.route('/restaurants/<int:restaurant_id>/<int:MenuID>/edit', methods=['GET', 'POST'])
-def editMenuItem(restaurant_id, MenuID):
-    editedItem = session.query(MenuItem).filter_by(id=MenuID).one()
+@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', 'POST'])
+def editMenuItem(restaurant_id, menu_id):
+    restaurant = session.query(Restaurant).filter_by \
+        (id=restaurant_id).one()
+    editedItem = session.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
@@ -173,9 +162,7 @@ def editMenuItem(restaurant_id, MenuID):
         return redirect(url_for('showMenu', restaurant_id=restaurant_id))
     else:
         # USE THE RENDER_TEMPLATE FUNCTION BELOW TO SEE THE VARIABLES YOU SHOULD USE IN YOUR EDITMENUITEM TEMPLATE
-        return render_template('editmenuitem.html', restaurant_id=restaurant_id,
-                               MenuID=MenuID, i=editedItem)
-
+        return render_template('editmenuitem.html', restaurant_id=restaurant.id,item=editedItem)
 
         # task3:create a route for deletemenuitem function here
 
@@ -183,6 +170,8 @@ def editMenuItem(restaurant_id, MenuID):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete',
            methods=['GET', 'POST'])
 def deleteMenuItem(restaurant_id, menu_id):
+    restaurant = session.query(Restaurant).filter_by \
+        (id=restaurant_id).one()
     itemToDelete = session.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
         session.delete(itemToDelete)
@@ -190,7 +179,7 @@ def deleteMenuItem(restaurant_id, menu_id):
         flash("menu item deleted")
         return redirect(url_for('showMenu', restaurant_id=restaurant_id))
     else:
-        return render_template('deleteMenuItem.html', item=itemToDelete)
+        return render_template('deleteMenuItem.html', item=itemToDelete, restaurant_id=restaurant_id)
 
 
 # main is app run by interpreter, other file have __name of pythonfile__
