@@ -14,6 +14,6 @@ a {text-decoration: none; color:#FFFFCC; font-size: .75em;}
 .name {width:50%;display: inline-block; float: left;}
 .description {}
 .price {text-align: right; width:50%; float: right; }
-.editdeletepane{}
+.editdeletepane{text-align: right; width:50%; float: right; border-color: #999999;}
 
 .flash          { background: #cee5F5; }

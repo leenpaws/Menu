@@ -71,7 +71,8 @@ def newRestaurant():
 
 @app.route('/restaurants/<int:restaurant_id>/edit', methods=['GET', 'POST'])
 def editRestaurant(restaurant_id):
-    editedRestaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    editedRestaurant = session.query(Restaurant).filter_by(id=restaurant_id,
+                                                           ).one()
     if request.method == 'POST':
         if request.form['name']:
             editedRestaurant.name = request.form['name']
@@ -82,25 +83,24 @@ def editRestaurant(restaurant_id):
     #url_for(show function) show the endpoint
     else:
         # USE THE RENDER_TEMPLATE FUNCTION BELOW TO SEE THE VARIABLES YOU SHOULD USE IN YOUR EDITMENUITEM TEMPLATE
-        return render_template('editRestaurant.html', restaurant_id=restaurant_id, i=editedRestaurant)
+        return render_template('editRestaurant.html',
+                               restaurant_id=restaurant_id, i=editedRestaurant)
 #use variables, for example restaurant_id, when it is applicable, otherwise leave out
 #this applies to variables that point within also, i.e. restaurant_id/menu_id
 #can also directly provide url
 
 
-rahul.ranjan@udacity.com
-
-
 @app.route('/restaurants/<int:restaurant_id>/delete', methods=['GET', 'POST'])
 def deleteRestaurant(restaurant_id):
-    itemToDelete = session.query(Restaurant).filter_by(id = restaurant_id).one()
+    itemToDelete = session.query(Restaurant).filter_by(id=restaurant_id).one()
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()
         flash("This page will be for deleting restaurant")
         return redirect(url_for('showMenu', restaurant_id=restaurant_id))
     else:
-        return render_template('deleteRestaurant.html', item=itemToDelete)
+        return render_template('deleteRestaurant.html', restaurant_id=restaurant_id,
+                               item=itemToDelete)
 
 
 # @app.route('/hello'), trailing slash will allow flash to
@@ -113,7 +113,9 @@ def showMenu(restaurant_id):
     items = session.query(MenuItem).filter_by \
         (restaurant_id=restaurant_id)
 
-    output = ''
+    output = str(restaurant.name)
+    output += '</br>'
+    output += '</br>'
     for i in items:
         output += i.name
         output += '</br>'
@@ -178,7 +180,8 @@ def editMenuItem(restaurant_id, MenuID):
         # task3:create a route for deletemenuitem function here
 
 
-@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
+@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete',
+           methods=['GET', 'POST'])
 def deleteMenuItem(restaurant_id, menu_id):
     itemToDelete = session.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
