@@ -64,7 +64,7 @@ def newRestaurant():
         session.add(newrestaurant)
         session.commit()
         flash('This page will be for making a new restaurant')
-        return redirect(url_for('restaurant'))
+        return redirect(url_for('showrestaurants'))
 
     #return redirect("/showRestaurants") or redirect(url_for("/restaurant"))
     #it's not the function it's the url, you're trying to build the url
@@ -103,7 +103,7 @@ def deleteRestaurant(restaurant_id):
         session.delete(itemToDelete)
         session.commit()
         flash("This page will be for deleting restaurant")
-        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
+        return redirect(url_for('showrestaurants'))
     else:
         return render_template('deleteRestaurant.html', restaurant_id=restaurant_id,
                                item=itemToDelete)
