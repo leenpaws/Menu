@@ -43,12 +43,12 @@ def menuItemJSON(restaurant_id, menu_id):
 # so either of these routes gets sent from browser function defined here gets executed
 
 @app.route('/')
-@app.route('/restaurants')
+@app.route('/restaurants/', methods=['GET', 'POST'])
 def showRestaurants():
     restaurant = session.query(Restaurant).all()
     flash('This page will show all my restaurants')
-    output = ''
-    return render_template('showRestaurants.html')
+
+    return render_template('showRestaurants.html', restaurant=restaurant)
 
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
