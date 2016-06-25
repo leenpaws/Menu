@@ -117,7 +117,7 @@ def showMenu(restaurant_id):
 
 # Task1: create route for newmenuitem function here
 
-@app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
+@app.route('/restaurants/<str:restaurant_>/new/', methods=['GET', 'POST'])
 # by default the route only responds to get requests but method makes it reposond to whatever you set it to
 
 def newMenuItem(restaurant_id):
